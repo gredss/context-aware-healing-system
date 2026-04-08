@@ -1,0 +1,10 @@
+2026-04-08 05:15:00 INFO Starting application
+2026-04-08 05:15:01 INFO Initializing database connection
+2026-04-08 05:15:02 INFO Database connected successfully
+2026-04-08 05:15:05 ERROR ZeroDivisionError in calculate_average: division by zero
+2026-04-08 05:15:05 ERROR Traceback: File "broken_app.py", line 10, in calculate_average
+2026-04-08 05:15:06 WARNING Retrying operation...
+2026-04-08 05:15:08 ERROR KeyError in get_user_data: 999
+2026-04-08 05:15:08 ERROR Traceback: File "broken_app.py", line 18, in get_user_data
+2026-04-08 05:15:10 INFO Processing completed with errors
+2026-04-08 05:15:11 INFO Application shutdown initiated

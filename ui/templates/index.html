@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ibm: {
+                            blue: '#0f62fe',
+                            darkblue: '#002d9c',
+                            gray: '#161616',
+                            lightgray: '#262626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-ibm-gray border-b border-gray-700">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-ibm-blue rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Context-Aware Healing System</h1>
+                        <p class="text-sm text-gray-400">Powered by IBM Granite 3.0</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="status-indicator" class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse-slow"></div>
+                        <span class="text-sm text-gray-300">Agent Active</span>
+                    </div>
+                    <button onclick="forceCheck()" class="px-4 py-2 bg-ibm-blue hover:bg-blue-600 rounded-lg text-sm font-medium transition">
+                        Force Check
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Incidents List -->
+            <div class="lg:col-span-1">
+                <div class="bg-ibm-lightgray rounded-lg shadow-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Detected Incidents
+                    </h2>
+                    <div id="incidents-list" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div class="text-center text-gray-400 py-8">
+                            <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p>No incidents detected</p>
+                            <p class="text-sm mt-1">System is healthy</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Status -->
+                <div class="bg-ibm-lightgray rounded-lg shadow-xl p-6 mt-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Health Status
+                    </h2>
+                    <div id="health-status" class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Status:</span>
+                            <span class="text-green-400 font-medium">Monitoring</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Incidents:</span>
+                            <span id="incident-count" class="text-white font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Pending:</span>
+                            <span id="pending-count" class="text-yellow-400 font-medium">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Proposed Fix & Actions -->
+            <div class="lg:col-span-2">
+                <!-- Agent Thoughts -->
+                <div class="bg-ibm-lightgray rounded-lg shadow-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Agent's Analysis
+                    </h2>
+                    <div id="agent-thoughts" class="bg-gray-800 rounded-lg p-4 font-mono text-sm">
+                        <p class="text-gray-400">Waiting for incidents...</p>
+                    </div>
+                </div>
+
+                <!-- Proposed Fix -->
+                <div class="bg-ibm-lightgray rounded-lg shadow-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                        Proposed Fix
+                    </h2>
+                    <div id="proposed-fix" class="bg-gray-800 rounded-lg p-4 max-h-96 overflow-y-auto">
+                        <pre class="text-sm text-gray-400 whitespace-pre-wrap">No fix proposed yet</pre>
+                    </div>
+                    
+                    <!-- Risk Assessment -->
+                    <div id="risk-assessment" class="mt-4 hidden">
+                        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-400">Risk Level:</span>
+                                <span id="risk-level" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-400">Confidence:</span>
+                                <span id="confidence-level" class="text-white font-medium"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="action-buttons" class="bg-ibm-lightgray rounded-lg shadow-xl p-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Ready to Apply Fix</h3>
+                            <p class="text-sm text-gray-400">Review the proposed changes and approve to heal the application</p>
+                        </div>
+                        <button onclick="approveFix()" class="px-8 py-4 bg-green-600 hover:bg-green-700 rounded-lg text-lg font-bold transition transform hover:scale-105 shadow-lg">
+                            ✓ Approve & Heal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Health Check Results -->
+                <div id="health-results" class="bg-ibm-lightgray rounded-lg shadow-xl p-6 mt-6 hidden">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Health Check Results
+                    </h2>
+                    <div id="health-output" class="bg-gray-800 rounded-lg p-4 font-mono text-sm max-h-64 overflow-y-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- WebSocket Connection Script -->
+    <script>
+        let ws = null;
+        let reconnectInterval = null;
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                updateStatusIndicator(true);
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                handleWebSocketMessage(message);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                updateStatusIndicator(false);
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(connectWebSocket, 5000);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        function handleWebSocketMessage(message) {
+            console.log('Received:', message);
+
+            switch (message.type) {
+                case 'initial_state':
+                    updateIncidentsList(message.data.incidents);
+                    if (message.data.pending) {
+                        displayProposedFix(message.data.pending);
+                    }
+                    break;
+                case 'incident_detected':
+                    addIncident(message.data);
+                    break;
+                case 'decision_made':
+                    displayProposedFix(message.data);
+                    break;
+                case 'patch_applied':
+                    displayHealthResults(message.data);
+                    break;
+                case 'approval_result':
+                    displayHealthResults(message.data);
+                    break;
+            }
+        }
+
+        function updateStatusIndicator(connected) {
+            const indicator = document.getElementById('status-indicator');
+            if (connected) {
+                indicator.innerHTML = `
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse-slow"></div>
+                    <span class="text-sm text-gray-300">Agent Active</span>
+                `;
+            } else {
+                indicator.innerHTML = `
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span class="text-sm text-gray-300">Disconnected</span>
+                `;
+            }
+        }
+
+        function updateIncidentsList(incidents) {
+            const list = document.getElementById('incidents-list');
+            document.getElementById('incident-count').textContent = incidents.length;
+
+            if (incidents.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center text-gray-400 py-8">
+                        <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p>No incidents detected</p>
+                        <p class="text-sm mt-1">System is healthy</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = incidents.map(incident => `
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-red-500">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-sm font-medium text-red-400">#${incident.id}</span>
+                        <span class="text-xs text-gray-400">${new Date(incident.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p class="text-sm font-medium mb-1">${incident.error_context.error_type}</p>
+                    <p class="text-xs text-gray-400 truncate">${incident.error_context.file_path || 'Unknown file'}</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 text-xs rounded-full ${getStatusColor(incident.status)}">${incident.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addIncident(incident) {
+            // Update agent thoughts
+            const thoughts = document.getElementById('agent-thoughts');
+            thoughts.innerHTML = `
+                <div class="text-green-400 mb-2">🔍 OBSERVE: Error detected in logs</div>
+                <div class="text-blue-400 mb-2">🧭 ORIENT: Analyzing ${incident.error_context.error_type} in ${incident.error_context.file_path}</div>
+                <div class="text-yellow-400 mb-2">🤔 DECIDE: Consulting Granite 3.0 for solution...</div>
+                <div class="text-gray-400">⏳ ACT: Waiting for approval...</div>
+            `;
+
+            // Refresh incidents list
+            fetchIncidents();
+        }
+
+        function displayProposedFix(decision) {
+            const fixDiv = document.getElementById('proposed-fix');
+            const riskDiv = document.getElementById('risk-assessment');
+            const actionsDiv = document.getElementById('action-buttons');
+
+            if (decision.fix_code) {
+                fixDiv.innerHTML = `<pre class="text-sm text-green-400 whitespace-pre-wrap">${decision.fix_code}</pre>`;
+                
+                // Show risk assessment
+                riskDiv.classList.remove('hidden');
+                document.getElementById('risk-level').textContent = decision.risk_level || 'unknown';
+                document.getElementById('risk-level').className = `px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(decision.risk_level)}`;
+                document.getElementById('confidence-level').textContent = `${decision.confidence || 0}%`;
+
+                // Show action buttons
+                actionsDiv.classList.remove('hidden');
+
+                // Update agent thoughts
+                const thoughts = document.getElementById('agent-thoughts');
+                thoughts.innerHTML = `
+                    <div class="text-green-400 mb-2">✅ OBSERVE: Error detected and analyzed</div>
+                    <div class="text-blue-400 mb-2">✅ ORIENT: Source code reviewed</div>
+                    <div class="text-yellow-400 mb-2">✅ DECIDE: Fix generated (Risk: ${decision.risk_level}, Confidence: ${decision.confidence}%)</div>
+                    <div class="text-purple-400">⏳ ACT: Awaiting manual approval</div>
+                    <div class="mt-3 text-gray-300 text-sm">
+                        <strong>Reasoning:</strong><br>
+                        ${decision.reasoning || 'No reasoning provided'}
+                    </div>
+                `;
+            }
+        }
+
+        function displayHealthResults(result) {
+            const resultsDiv = document.getElementById('health-results');
+            const outputDiv = document.getElementById('health-output');
+            
+            if (result.health_check) {
+                resultsDiv.classList.remove('hidden');
+                outputDiv.innerHTML = `<pre class="whitespace-pre-wrap">${result.health_check.output}</pre>`;
+            }
+
+            // Update agent thoughts
+            const thoughts = document.getElementById('agent-thoughts');
+            thoughts.innerHTML = `
+                <div class="text-green-400 mb-2">✅ OBSERVE: Monitoring resumed</div>
+                <div class="text-blue-400 mb-2">✅ ORIENT: System state updated</div>
+                <div class="text-yellow-400 mb-2">✅ DECIDE: Action completed</div>
+                <div class="text-green-400">✅ ACT: Patch applied successfully</div>
+                <div class="mt-3 text-gray-300 text-sm">
+                    <strong>Result:</strong> ${result.message || 'Action completed'}
+                </div>
+            `;
+
+            // Hide action buttons
+            document.getElementById('action-buttons').classList.add('hidden');
+            
+            // Refresh incidents
+            setTimeout(fetchIncidents, 1000);
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'detected': return 'bg-red-900 text-red-300';
+                case 'applied': return 'bg-green-900 text-green-300';
+                case 'pending_approval': return 'bg-yellow-900 text-yellow-300';
+                default: return 'bg-gray-900 text-gray-300';
+            }
+        }
+
+        function getRiskColor(risk) {
+            switch (risk) {
+                case 'low': return 'bg-green-900 text-green-300';
+                case 'medium': return 'bg-yellow-900 text-yellow-300';
+                case 'high': return 'bg-red-900 text-red-300';
+                default: return 'bg-gray-900 text-gray-300';
+            }
+        }
+
+        async function fetchIncidents() {
+            try {
+                const response = await fetch('/api/incidents');
+                const data = await response.json();
+                updateIncidentsList(data.incidents);
+            } catch (error) {
+                console.error('Error fetching incidents:', error);
+            }
+        }
+
+        async function approveFix() {
+            try {
+                const response = await fetch('/api/approve', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('Fix approved and applied');
+                } else {
+                    alert('Error applying fix: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error approving fix:', error);
+                alert('Error approving fix');
+            }
+        }
+
+        async function forceCheck() {
+            try {
+                const response = await fetch('/api/force-check', { method: 'POST' });
+                const result = await response.json();
+                console.log('Force check result:', result);
+            } catch (error) {
+                console.error('Error forcing check:', error);
+            }
+        }
+
+        // Initialize
+        connectWebSocket();
+        fetchIncidents();
+
+        // Keep WebSocket alive
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send('ping');
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
