@@ -204,7 +204,3 @@ ruff check mcp_server/ examples/
 ```bash
 mypy mcp_server/
 ```
-
-## License
-
-[Add your license information here]
